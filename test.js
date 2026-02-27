@@ -1,0 +1,1 @@
+const { loadEnvConfig } = require('@next/env'); loadEnvConfig('.'); console.log(JSON.stringify(process.env.FIREBASE_PRIVATE_KEY.substring(0, 50))); console.log(process.env.FIREBASE_PRIVATE_KEY.includes('\n')); console.log(process.env.FIREBASE_PRIVATE_KEY.includes('\\n'));

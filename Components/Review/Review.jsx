@@ -19,16 +19,16 @@ const Review = () => {
   const titleRef = useRef(null)
   const cardsRef = useRef([])
 
-  const reviews = [
+  const [data, setData] = useState(null)
+
+  const defaultReviews = [
     {
       id: 1,
       authorName: "Sarah Amin",
       authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786",
       position: "Marketing Manager",
-      description:
-        "Working with Shahriar was a great experience. The designs were clean, professional, and on-brand. Our entire team was impressed with the attention to detail!",
+      description: "Working with Shahriar was a great experience. The designs were clean, professional, and on-brand.",
       company: "GreenTech Solutions",
-      companyImage: "/companies/greentech.png",
       companyLogo: "GREENTECH",
       rating: 5,
     },
@@ -37,88 +37,27 @@ const Review = () => {
       authorName: "James Patel",
       authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
       position: "Founder & CEO",
-      description:
-        "The branding and UI Shahriar delivered helped us increase customer trust and improve conversion rates by over 30%. Highly recommended for any business!",
+      description: "The branding and UI Shahriar delivered helped us increase customer trust.",
       company: "StartupNest",
-      companyImage: "/companies/startupnest.png",
       companyLogo: "Sotheby's",
       rating: 5,
-    },
-    {
-      id: 3,
-      authorName: "Amina Rahman",
-      authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-      position: "Creative Director",
-      description:
-        "Shahriar's attention to detail is unmatched. He translated our vague ideas into bold, visually stunning designs that exceeded our expectations completely.",
-      company: "BoldVision Studio",
-      companyImage: "/companies/boldvision.png",
-      companyLogo: "CENTURY 21",
-      rating: 4,
-    },
-    {
-      id: 4,
-      authorName: "Rafiq Chowdhury",
-      authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-      position: "Product Manager",
-      description:
-        "Professional, responsive, and extremely talented. Shahriar exceeded our expectations at every step and delivered results that truly made a difference.",
-      company: "TechHive",
-      companyImage: "/companies/techhive.png",
-      companyLogo: "inman",
-      rating: 5,
-    },
-    {
-      id: 5,
-      authorName: "Maria Garcia",
-      authorImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
-      position: "Brand Manager",
-      description:
-        "Outstanding work! The logo design and brand identity perfectly captured our vision. The entire process was smooth and the results speak for themselves.",
-      company: "Creative Labs",
-      companyImage: "/companies/creative.png",
-      companyLogo: "CREATIVE LABS",
-      rating: 5,
-    },
-    {
-      id: 6,
-      authorName: "David Kim",
-      authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
-      position: "Design Lead",
-      description:
-        "Incredible attention to detail and creative vision. Shahriar delivered designs that not only looked amazing but also performed exceptionally well.",
-      company: "Digital Agency",
-      companyImage: "/companies/digital.png",
-      companyLogo: "DIGITAL PRO",
-      rating: 4,
-    },
-    {
-      id: 7,
-      authorName: "Lisa Thompson",
-      authorImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-      position: "Marketing Head",
-      description:
-        "The social media designs and campaign materials were absolutely perfect. Our engagement increased significantly after implementing the new designs.",
-      company: "Social Media Co",
-      companyImage: "/companies/social.png",
-      companyLogo: "SOCIAL MEDIA CO",
-      rating: 5,
-    },
-    {
-      id: 8,
-      authorName: "Ahmed Hassan",
-      authorImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7",
-      position: "Business Owner",
-      description:
-        "From concept to execution, everything was handled professionally. The final designs helped establish our brand presence in the competitive market.",
-      company: "Business Solutions",
-      companyImage: "/companies/business.png",
-      companyLogo: "BIZ SOLUTIONS",
-      rating: 5,
-    },
+    }
   ]
 
   useEffect(() => {
+    // Fetch Review Data
+    fetch("/api/content/reviews")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data && Object.keys(json.data).length > 0) {
+          setData(json.data)
+          if (json.data.reviewsList) {
+             setTotalSlides(json.data.reviewsList.length)
+          }
+        }
+      })
+      .catch(err => console.error(err))
+
     const title = titleRef.current
 
     // Title entrance animation
@@ -197,10 +136,9 @@ const Review = () => {
             ref={titleRef}
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-[84px] font-bold text-[#0B1838] leading-tight max-w-5xl px-2 sm:px-0"
           >
-            Trusted By Top
-            <br />
-            Companies Nationwide
+            {data?.title || <>Trusted By Top<br />Companies Nationwide</>}
           </h2>
+          {data?.subtitle && <p className="text-gray-600 mt-4 text-lg">{data.subtitle}</p>}
         </div>
 
         {/* Reviews Slider */}
@@ -258,37 +196,39 @@ const Review = () => {
                 prevEl: ".review-prev",
               }}
             >
-              {reviews.map((review, index) => (
-                <SwiperSlide key={review.id}>
+              {(data?.reviewsList || defaultReviews).map((review, index) => (
+                <SwiperSlide key={index}>
                   <div
                     ref={(el) => (cardsRef.current[index] = el)}
                     className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 shadow-lg hover:shadow-xl transition-all duration-300 h-[260px] sm:h-[280px] md:h-[300px] lg:h-[320px] xl:h-[340px] flex flex-col"
                   >
                     {/* Author Info */}
                     <div className="flex items-center mb-3 sm:mb-4">
-                      <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden mr-3 sm:mr-4 flex-shrink-0">
-                        <Image
-                          src={review.authorImage || "/placeholder.svg"}
-                          alt={review.authorName}
-                          fill
-                          
-                          className="object-cover"
-                          sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 56px"
-                        />
+                      <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden mr-3 sm:mr-4 flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                        {review.imageUrl || review.authorImage ? (
+                          <Image
+                            src={review.imageUrl || review.authorImage}
+                            alt={review.name || review.authorName || "User"}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 56px"
+                          />
+                        ) : (
+                           <span className="text-xs text-gray-400">User</span>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <h4 className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base truncate">
-                          {review.authorName.split(" ")[0]} {review.authorName.split(" ")[1]?.[0]},{" "}
-                          {review.position.split(" ")[0]}
+                          {review.name || review.authorName}
                         </h4>
-                        <p className="text-gray-600 text-xs sm:text-sm truncate">{review.company.split(" ")[0]}</p>
+                        <p className="text-gray-600 text-xs sm:text-sm truncate">{review.role || review.position}</p>
                       </div>
                     </div>
 
                     {/* Review Text */}
                     <div className="mb-4 sm:mb-6 flex-grow">
                       <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed line-clamp-3 sm:line-clamp-4 md:line-clamp-5">
-                        {review.description}
+                        {review.comment || review.description}
                       </p>
                     </div>
 
@@ -296,9 +236,9 @@ const Review = () => {
                     <div className="border-t pt-3 sm:pt-4 mt-auto">
                       <div className="flex items-center justify-between">
                         <div className="text-xs sm:text-sm font-bold text-gray-800 uppercase tracking-wider truncate flex-1 mr-2">
-                          {review.companyLogo}
+                          {review.companyLogo || (review.role && review.role.split(" ").slice(-1)[0]) || "CLIENT"}
                         </div>
-                        <div className="flex space-x-1 flex-shrink-0">{renderStars(review.rating)}</div>
+                        <div className="flex space-x-1 flex-shrink-0">{renderStars(review.rating || 5)}</div>
                       </div>
                     </div>
                   </div>

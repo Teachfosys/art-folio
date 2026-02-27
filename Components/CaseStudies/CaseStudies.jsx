@@ -1,69 +1,50 @@
 "use client"
 import { gsap } from "gsap"
 import Image from "next/image"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import "swiper/css"
 import "swiper/css/navigation"
 import { Autoplay, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 const CaseStudies = () => {
+    const [data, setData] = useState(null)
     const buttonRef = useRef(null)
     const titleRef = useRef(null)
     const subtitleRef = useRef(null)
 
+    // Fallback static data
     const Case = [
         {
             id: 1,
             title: "Logo & Branding for LuxeHair",
             category: "Beauty & Wellness",
-            description:
-                "Developed a luxurious and modern logo along with complete brand identity for LuxeHair, a premium haircare brand.",
+            description: "Developed a luxurious and modern logo along with complete brand identity for LuxeHair.",
             image: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960",
-            year: 2024,
             bgColor: "bg-[#B8E6B8]", // Light green
         },
         {
             id: 2,
             title: "Social Campaign for EcoWorld",
             category: "Environmental NGO",
-            description:
-                "Designed visually compelling graphics for a 3-month awareness campaign on social media, increasing engagement by 200%.",
+            description: "Designed visually compelling graphics for a 3-month awareness campaign on social media.",
             image: "https://images.unsplash.com/photo-1626785774625-ddcddc3445e9",
-            year: 2023,
             bgColor: "bg-[#F4C2C2]", // Light pink
-        },
-        {
-            id: 3,
-            title: "Product Packaging for Zest Drinks",
-            category: "FMCG",
-            description: "Created vibrant packaging design and mockups for a new series of organic energy drinks.",
-            image: "https://images.unsplash.com/photo-1516131206008-dd041a9764fd",
-            year: 2024,
-            bgColor: "bg-[#A8D8EA]", // Light blue
-        },
-        {
-            id: 4,
-            title: "Portfolio Website UI for Maya Roy",
-            category: "Personal Branding",
-            description: "Designed and prototyped a clean and elegant UI for a fashion photographer's portfolio using Figma.",
-            image: "https://plus.unsplash.com/premium_photo-1661284886711-4eaee4fa7771",
-            year: 2022,
-            bgColor: "bg-[#FFE135]", // Light yellow
-        },
-        {
-            id: 5,
-            title: "Event Poster Series for Dhaka Art Week",
-            category: "Event & Culture",
-            description:
-                "Conceptualized and illustrated a poster series for a city-wide art festival attended by over 10,000 visitors.",
-            image: "https://plus.unsplash.com/premium_photo-1661281412140-dfb328ae967b",
-            year: 2023,
-            bgColor: "bg-[#D4A5D4]", // Light purple
-        },
+        }
     ]
 
+
     useEffect(() => {
+        // Fetch specific data
+        fetch("/api/content/casestudies")
+            .then(res => res.json())
+            .then(json => {
+                if (json.data && Object.keys(json.data).length > 0) {
+                    setData(json.data)
+                }
+            })
+            .catch(err => console.error(err))
+
         const button = buttonRef.current
         const title = titleRef.current
         const subtitle = subtitleRef.current
@@ -120,16 +101,14 @@ const CaseStudies = () => {
                     {/* Section Title */}
                         <div>
                             <h2 ref={titleRef} className="text-4xl md:text-6xl lg:text-[84px] font-normal leading-tight text-gray-900">
-                                Real Case
-                                <br />
-                                <span className="text-[#E436A2]">Studies</span>
+                                {data?.title || <>Real Case<br /><span className="text-[#E436A2]">Studies</span></>}
                             </h2>
                         </div>
                     
                     {/* Right Content */}
                     <div className="max-w-lg">
                         <h3 ref={subtitleRef} className="text-xl md:text-2xl font-normal text-black leading-relaxed mb-6">
-                            We've helped thousands of students launch <br className="hidden md:block" /> and scale their online stores
+                            {data?.subtitle || <>We've helped thousands of students launch <br className="hidden md:block" /> and scale their online stores</>}
                         </h3>
                         <button
                             ref={buttonRef}
@@ -177,17 +156,21 @@ const CaseStudies = () => {
                     }}
                     className="case-studies-swiper"
                 >
-                    {Case.map((caseStudy, index) => (
-                        <SwiperSlide key={caseStudy.id} className="py-8">
+                    {(data?.projects || Case).map((caseStudy, index) => {
+                        const bgColors = ["bg-[#B8E6B8]", "bg-[#F4C2C2]", "bg-[#A8D8EA]", "bg-[#FFE135]", "bg-[#D4A5D4]"];
+                        const blockBg = bgColors[index % bgColors.length];
+                        
+                        return (
+                        <SwiperSlide key={index} className="py-8">
                             <div
-                                className={`group ${caseStudy.bgColor} rounded-[40px] p-6 h-[500px] md:h-[600px] relative overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer `}
+                                className={`group ${blockBg} rounded-[40px] p-6 h-[500px] md:h-[600px] relative overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer `}
                             >
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-6">
                                     <h3 className="text-black text-xl md:text-2xl font-semibold leading-tight max-w-[70%]">
-                                        {caseStudy.title.split(" ").slice(0, 3).join(" ")}
+                                        {(caseStudy.name || caseStudy.title).split(" ").slice(0, 3).join(" ")}
                                         <br />
-                                        Case Study
+                                        {caseStudy.category || "Case Study"}
                                     </h3>
                                     <button className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300">
                                         View Full
@@ -197,8 +180,8 @@ const CaseStudies = () => {
                                 {/* Image Container */}
                                 <div className="relative h-[350px] md:h-[420px] rounded-[30px] overflow-hidden">
                                     <Image
-                                        src={caseStudy.image || "/placeholder.svg"}
-                                        alt={caseStudy.title}
+                                        src={caseStudy.imageUrl || caseStudy.image || "/placeholder.svg"}
+                                        alt={caseStudy.name || caseStudy.title}
                                         fill
                                         
                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -220,7 +203,7 @@ const CaseStudies = () => {
                                 </div>
                             </div>
                         </SwiperSlide>
-                    ))}
+                    )})}
                 </Swiper>
             </div>
         </section>

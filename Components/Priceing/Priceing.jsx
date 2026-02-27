@@ -1,17 +1,18 @@
 "use client"
 
-import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useEffect, useRef, useState } from "react"
 
 gsap.registerPlugin(ScrollTrigger)
 
 const Pricing = () => {
+  const [data, setData] = useState(null)
   const sectionRef = useRef(null)
   const titleRef = useRef(null)
   const cardsRef = useRef([])
 
-  const plans = [
+  const defaultPlans = [
     {
       packageName: "Starter",
       title: "Quick Launch",
@@ -23,29 +24,34 @@ const Pricing = () => {
         "Industry-Leading GRC Platform",
         "Maturity Gap Assessment",
         "Fractional CISO Support",
-        "Framework Selection Guidance",
-        "Basic Trust Center Setup",
       ],
     },
     {
       packageName: "Pro",
       title: "Growth Mode",
       description: "Designed for scaling teams and growing compliance needs.",
-      idealFor: "Ideal for small to mid-sized businesses expanding operations or entering regulated markets.",
+      idealFor: "Ideal for small to mid-sized businesses expanding operations.",
       cta: "Book your strategy session",
       included: [
         "Compliance Frameworks (3–4)",
         "GRC Platform Premium",
         "Full Maturity Assessment",
         "Dedicated Fractional CISO",
-        "Custom Trust Center",
-        "Policy Drafting Support",
-        "Vendor Risk Management",
       ],
     },
   ]
 
   useEffect(() => {
+    // Fetch Dynamic Data
+    fetch("/api/content/pricing")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data && Object.keys(json.data).length > 0) {
+          setData(json.data)
+        }
+      })
+      .catch(err => console.error(err))
+
     const section = sectionRef.current
     const title = titleRef.current
     const cards = cardsRef.current
@@ -146,13 +152,17 @@ const Pricing = () => {
             ref={titleRef}
             className="text-4xl md:text-6xl lg:text-[84px] font-normal leading-tight text-gray-900 mb-6"
           >
-            <span className="text-[#E436A2]">Perfect Plan</span>
+            {data?.title ? (
+               <span className="text-[#E436A2]">{data.title}</span>
+            ) : (
+               <span className="text-[#E436A2]">Perfect Plan</span>
+            )}
           </h2>
         </div>
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => {
+          {(data?.plans || defaultPlans).map((plan, index) => {
             const cardStyle = getCardStyles(index)
             const isPopular = index === 1
 

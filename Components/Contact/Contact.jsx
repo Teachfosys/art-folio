@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useEffect, useRef, useState } from "react"
 
 gsap.registerPlugin(ScrollTrigger)
 
 const Contact = () => {
+  const [data, setData] = useState(null)
   const sectionRef = useRef(null)
   const titleRef = useRef(null)
   const formRef = useRef(null)
@@ -20,6 +21,16 @@ const Contact = () => {
   })
 
   useEffect(() => {
+    // Fetch Dynamic Data
+    fetch("/api/content/contact")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data && Object.keys(json.data).length > 0) {
+          setData(json.data)
+        }
+      })
+      .catch(err => console.error(err))
+
     const section = sectionRef.current
     const title = titleRef.current
     const form = formRef.current
@@ -153,12 +164,10 @@ const Contact = () => {
             ref={titleRef}
             className="text-4xl md:text-6xl lg:text-[84px] font-normal leading-tight text-gray-900 mb-6"
           >
-            Got Ideas?
-            <br />
-            <span className="text-[#E436A2]">Let's hop on a call</span>
+            {data?.title || <>Got Ideas?<br /><span className="text-[#E436A2]">Let's hop on a call</span></>}
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Tell us more about yourself and what you've got in mind
+            {data?.subtitle || "Tell us more about yourself and what you've got in mind"}
           </p>
         </div>
 
@@ -189,7 +198,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900">Email</h4>
-                  <p className="text-gray-600">hello@shahriar.design</p>
+                  <p className="text-gray-600">{data?.email || "hello@shahriar.design"}</p>
                 </div>
               </div>
 
@@ -206,7 +215,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900">Phone</h4>
-                  <p className="text-gray-600">+880 1234 567890</p>
+                  <p className="text-gray-600">{data?.phone || "+880 1234 567890"}</p>
                 </div>
               </div>
 
@@ -229,7 +238,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900">Location</h4>
-                  <p className="text-gray-600">Dhaka, Bangladesh</p>
+                  <p className="text-gray-600">{data?.location || "Dhaka, Bangladesh"}</p>
                 </div>
               </div>
             </div>
@@ -372,7 +381,7 @@ const Contact = () => {
         <div className="w-full mt-16 p-4 rounded-3xl overflow-hidden">
           <iframe
             className="w-full h-[300px] md:h-[400px] rounded-3xl border-0"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.453895552485!2d90.41817497589164!3d23.803566486510575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c769db015e6f%3A0x5e6aabe0df4a79f7!2sKachari%20Para%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1681234567890!5m2!1sen!2sbd"
+            src={data?.mapUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.453895552485!2d90.41817497589164!3d23.803566486510575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c769db015e6f%3A0x5e6aabe0df4a79f7!2sKachari%20Para%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1681234567890!5m2!1sen!2sbd"}
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"

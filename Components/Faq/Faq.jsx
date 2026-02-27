@@ -1,57 +1,40 @@
 "use client"
-import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useEffect, useRef, useState } from "react"
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger)
 
 const Faq = () => {
+  const [data, setData] = useState(null)
   const [activeIndex, setActiveIndex] = useState(null)
   const titleRef = useRef(null)
   const faqRefs = useRef([])
   const sectionRef = useRef(null)
 
-  const faqs = [
+  const defaultFaqs = [
     {
-      id: 1,
       question: "What services do you offer?",
-      answer:
-        "I specialize in graphic design services such as logo design, brand identity, social media design, packaging, and UI design for websites and mobile apps.",
+      answer: "I specialize in graphic design services such as logo design, brand identity, social media design, packaging, and UI design for websites and mobile apps.",
     },
     {
-      id: 2,
       question: "How long does it take to complete a project?",
-      answer:
-        "It depends on the complexity of the project. Most branding and design tasks are completed within 3 to 7 business days.",
-    },
-    {
-      id: 3,
-      question: "What tools do you use for design?",
-      answer:
-        "I use tools like Adobe Illustrator, Photoshop, Figma, and After Effects to deliver high-quality and industry-standard designs.",
-    },
-    {
-      id: 4,
-      question: "Do you offer revisions?",
-      answer:
-        "Yes, I provide 2-3 free revisions depending on the project type. My goal is to make sure you're 100% satisfied with the final result.",
-    },
-    {
-      id: 5,
-      question: "How can I hire you for a project?",
-      answer:
-        "You can reach out to me through my contact form, LinkedIn, or email. Once I understand your requirements, I'll share a quote and timeline.",
-    },
-    {
-      id: 6,
-      question: "Do you require an advance payment?",
-      answer:
-        "Yes, I usually take a 50% advance to confirm the project and the rest upon delivery. Payment methods include bKash, Payoneer, and bank transfer.",
-    },
+      answer: "It depends on the complexity of the project. Most branding and design tasks are completed within 3 to 7 business days.",
+    }
   ]
 
   useEffect(() => {
+    // Fetch Dynamic Data
+    fetch("/api/content/faq")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data && Object.keys(json.data).length > 0) {
+          setData(json.data)
+        }
+      })
+      .catch(err => console.error(err))
+
     const title = titleRef.current
     const section = sectionRef.current
 
@@ -207,17 +190,15 @@ const Faq = () => {
             ref={titleRef}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-[84px] font-bold text-[#0B1838] leading-tight uppercase"
           >
-            Frequently Ask
-            <br />
-            <span className="text-[#E436A2]">Questions</span>
+            {data?.title || <>Frequently Ask<br /><span className="text-[#E436A2]">Questions</span></>}
           </h2>
         </div>
 
         {/* FAQ Items */}
         <div className="max-w-4xl mx-auto space-y-6">
-          {faqs.map((faq, index) => (
+          {(data?.faqs || defaultFaqs).map((faq, index) => (
             <div
-              key={faq.id}
+              key={index}
               ref={(el) => (faqRefs.current[index] = el)}
               className="bg-white rounded-2xl p-6 md:p-8 shadow-lg cursor-pointer transition-all duration-300"
               onClick={() => toggleFaq(index)}

@@ -1,7 +1,7 @@
 "use client"
 import { gsap } from "gsap"
 import Image from "next/image"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import "swiper/css"
 import "swiper/css/autoplay"
 import "swiper/css/pagination"
@@ -10,27 +10,34 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import MarqueeSlide from "../Marquee/Marquee"
 
 export default function Hero() {
+  const [heroData, setHeroData] = useState(null)
+  
   const h1Ref = useRef(null)
   const h2Ref = useRef(null)
   const pRef = useRef(null)
   const sliderRef = useRef(null)
 
-  const images = [
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    },
-    {
-      id: 2,
-      url: "https://images.unsplash.com/photo-1593642634367-d91a135587b5",
-    },
-    {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f",
-    },
+  const defaultImages = [
+    { id: 1, url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
+    { id: 2, url: "https://images.unsplash.com/photo-1593642634367-d91a135587b5" },
+    { id: 3, url: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f" },
   ]
 
+  const displayImages = heroData?.imageUrl 
+    ? [{ id: 0, url: heroData.imageUrl }, ...defaultImages] 
+    : defaultImages;
+
   useEffect(() => {
+    // Fetch dynamic content
+    fetch("/api/content/hero")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data && Object.keys(json.data).length > 0) {
+          setHeroData(json.data)
+        }
+      })
+      .catch(err => console.error("Failed to fetch hero data:", err))
+
     const h1 = h1Ref.current
     const h2 = h2Ref.current
     const p = pRef.current
@@ -120,11 +127,11 @@ export default function Hero() {
         {/* Heading Section */}
         <div className="flex flex-col justify-center items-center pt-40 text-center px-4">
           <h1 ref={h1Ref} className="text-4xl sm:text-5xl md:text-[88px] text-black font-medium leading-tight">
-            It's <span className="text-[#E436A2] bg-white px-7 py-5 rounded-full inline-block">Humaira</span>
+            {heroData?.title || <>It's <span className="text-[#E436A2] bg-white px-7 py-5 rounded-full inline-block">Humaira</span></>}
           </h1>
 
           <h2 ref={h2Ref} className="text-3xl sm:text-4xl md:text-[88px] text-black font-normal leading-tight mt-5">
-            Your Vision, My Design
+            {heroData?.subtitle || "Your Vision, My Design"}
           </h2>
 
           <div className="flex justify-center">
@@ -132,8 +139,7 @@ export default function Hero() {
               ref={pRef}
               className="text-base sm:text-[17px] md:text-[18px] text-[#343434] mt-6 w-full md:w-[90%] lg:w-[75%] xl:w-[51%] max-w-full text-center"
             >
-              With 4 years of experience, I design impactful brand identities that combine creativity and strategy. I
-              craft logos, visuals, and systems that help businesses stand out with clarity, purpose, and style.
+              {heroData?.description || "With 4 years of experience, I design impactful brand identities that combine creativity and strategy. I craft logos, visuals, and systems that help businesses stand out with clarity, purpose, and style."}
             </p>
           </div>
         </div>
@@ -166,7 +172,7 @@ export default function Hero() {
                 "--swiper-pagination-bullet-horizontal-gap": "4px",
               }}
             >
-              {images.map((image) => (
+              {displayImages.map((image) => (
                 <SwiperSlide key={image.id}>
                   <div className="relative w-full h-full">
                     <Image
